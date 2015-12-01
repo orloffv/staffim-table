@@ -1,0 +1,18 @@
+<li class="dropdown" uib-dropdown ng-show="items.length">
+    <a href="" uib-dropdown-toggle>
+        <i class="zmdi zmdi-filter-list"></i>
+    </a>
+    <ul class="dropdown-menu dropdown-menu-right">
+        <li class="dropdown-header text-right">
+            <span>Фильтр</span>
+        </li>
+        <li
+            ng-repeat="item in items"
+            ng-class="{'active': isActive(item)}"
+            ng-click="filterBy(item)">
+            <a href="#">
+                {{item.title}}
+            </a>
+        </li>
+    </ul>
+</li>

@@ -1,0 +1,18 @@
+<tr class="ng-table-sort-header">
+    <th colspan="{{$columns.length}}">
+        <div class="lv-header-alt clearfix">
+            <ng-include ng-if="params.headerTemplate" src="params.headerTemplate"></ng-include>
+            <h2 class="lvh-label hidden-xs" ng-if="params.headerH2">{{params.headerH2}}</h2>
+            <st-search columns="$columns" params="params" show-search="showSearch"></st-search>
+            <ul class="lv-actions actions">
+                <li>
+                    <a href="" ng-click="showSearch = true">
+                        <i class="zmdi zmdi-search"></i>
+                    </a>
+                </li>
+                <st-filter columns="$columns" params="params"></st-filter>
+                <st-sort columns="$columns" params="params"></st-sort>
+            </ul>
+        </div>
+    </th>
+</tr>
