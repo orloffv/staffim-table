@@ -7,6 +7,7 @@ module.exports = function(grunt) {
                 src: [
                     'src/scripts/staffimTable.module.js',
                     'src/scripts/staffimTable.withSelect.js',
+                    'src/scripts/staffimTable.withActions.js',
                     'src/scripts/staffimTable.filter.js',
                     'src/scripts/staffimTable.sort.js',
                     'src/scripts/staffimTable.search.js',
