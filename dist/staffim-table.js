@@ -322,9 +322,9 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
     "        <div class=\"lv-header-alt clearfix\">\n" +
     "            <ng-include ng-if=\"params.headerTemplate\" src=\"params.headerTemplate\"></ng-include>\n" +
     "            <h2 class=\"lvh-label hidden-xs\" ng-if=\"params.headerH2\">{{params.headerH2}}</h2>\n" +
-    "            <st-search columns=\"$columns\" params=\"params\" show-search=\"showSearch\"></st-search>\n" +
+    "            <st-search ng-if=\"params.searchDisable !== true\" columns=\"$columns\" params=\"params\" show-search=\"showSearch\"></st-search>\n" +
     "            <ul class=\"lv-actions actions\">\n" +
-    "                <li>\n" +
+    "                <li ng-if=\"params.searchDisable !== true\">\n" +
     "                    <a href=\"\" ng-click=\"showSearch = true\">\n" +
     "                        <i class=\"zmdi zmdi-search\"></i>\n" +
     "                    </a>\n" +

@@ -3,9 +3,9 @@
         <div class="lv-header-alt clearfix">
             <ng-include ng-if="params.headerTemplate" src="params.headerTemplate"></ng-include>
             <h2 class="lvh-label hidden-xs" ng-if="params.headerH2">{{params.headerH2}}</h2>
-            <st-search columns="$columns" params="params" show-search="showSearch"></st-search>
+            <st-search ng-if="params.searchDisable !== true" columns="$columns" params="params" show-search="showSearch"></st-search>
             <ul class="lv-actions actions">
-                <li>
+                <li ng-if="params.searchDisable !== true">
                     <a href="" ng-click="showSearch = true">
                         <i class="zmdi zmdi-search"></i>
                     </a>
