@@ -1,0 +1,14 @@
+{
+  "name": "staffim-table",
+  "main": "./dist/staffim-table.js",
+  "ignore": [
+    "src",
+    ".gitignore",
+    "Gruntfile.js",
+    "package.json"
+  ],
+  "dependencies": {
+    "ng-table": "1.0.0-beta.9",
+    "angular": "latest"
+  }
+}
