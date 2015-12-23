@@ -11,7 +11,6 @@ module.exports = function(grunt) {
                     'src/scripts/staffimTable.filter.js',
                     'src/scripts/staffimTable.sort.js',
                     'src/scripts/staffimTable.search.js',
-                    'src/scripts/staffimTable.compile.js',
                     'src/scripts/staffimTable.config.js',
                     '.tmp/templates.js'
                 ],
