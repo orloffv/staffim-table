@@ -325,6 +325,9 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('/staffim-table/pagination.html',
+    "<div class=\"lv-body ng-cloak ng-table-empty\" ng-if=\"params.total() === 0 && params.showEmpty !== false\">\n" +
+    "    <div class=\"text-center text-uppercase p-25\">Ничего не найдено</div>\n" +
+    "</div>\n" +
     "<div class=\"ng-cloak ng-table-pager\" ng-if=\"params.total() > params.count()\">\n" +
     "    <ul ng-if=\"pages.length\" class=\"pagination ng-table-pagination\">\n" +
     "        <li ng-class=\"{'disabled': !page.active && !page.current, 'active': page.current}\" ng-repeat=\"page in pages\" ng-switch=\"page.type\">\n" +
