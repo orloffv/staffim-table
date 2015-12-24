@@ -1,9 +1,9 @@
-<div class="lvh-search" ng-show="showSearch">
+<div class="lvh-search" ng-show="search.show">
     <input
         data-field="input_search"
         type="text" class="lvhs-input" placeholder="Поиск..." autocapitalize="false" spellcheck="false" autocomplete="off"
         ng-model="filter.query"
         ng-model-options="{updateOn: 'default blur', debounce: {'default': 500, 'blur': 0}}"
         >
-    <i class="lvh-search-close" ng-click="showSearch = false; filter.query = ''">&times;</i>
+    <i class="lvh-search-close" ng-click="search.show = false; filter.query = ''">&times;</i>
 </div>

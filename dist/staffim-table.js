@@ -230,7 +230,7 @@
             scope: {
                 columns: '=',
                 params: '=',
-                showSearch: '='
+                search: '='
             },
             link: function($scope, element) {
                 var lastQuery = '';
@@ -246,8 +246,8 @@
                     }
                 });
 
-                $scope.$watch('showSearch', function(showSearch) {
-                    if (showSearch) {
+                $scope.$watch('search.show', function(show) {
+                    if (show) {
                         $timeout(function() {
                             element.find('[data-field="input_search"]').focus();
                         });
@@ -300,13 +300,13 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
   $templateCache.put('/staffim-table/header.html',
     "<tr class=\"ng-table-sort-header\">\n" +
     "    <th colspan=\"{{$columns.length}}\">\n" +
-    "        <div class=\"lv-header-alt clearfix\">\n" +
+    "        <div class=\"lv-header-alt clearfix\" ng-init=\"stSearch = {show: false};\">\n" +
     "            <ng-include ng-if=\"params.headerTemplate\" src=\"params.headerTemplate\"></ng-include>\n" +
     "            <h2 class=\"lvh-label hidden-xs\" ng-if=\"params.headerH2\">{{params.headerH2}}</h2>\n" +
-    "            <st-search ng-if=\"params.searchDisable !== true\" columns=\"$columns\" params=\"params\" show-search=\"showSearch\"></st-search>\n" +
+    "            <st-search ng-if=\"params.searchDisable !== true\" columns=\"$columns\" params=\"params\" search=\"stSearch\"></st-search>\n" +
     "            <ul class=\"lv-actions actions\">\n" +
     "                <li ng-if=\"params.searchDisable !== true\">\n" +
-    "                    <a href=\"\" ng-click=\"showSearch = true\">\n" +
+    "                    <a href=\"\" ng-click=\"stSearch.show = true\">\n" +
     "                        <i class=\"zmdi zmdi-search\"></i>\n" +
     "                    </a>\n" +
     "                </li>\n" +
@@ -341,14 +341,14 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
 
 
   $templateCache.put('/staffim-table/search.html',
-    "<div class=\"lvh-search\" ng-show=\"showSearch\">\n" +
+    "<div class=\"lvh-search\" ng-show=\"search.show\">\n" +
     "    <input\n" +
     "        data-field=\"input_search\"\n" +
     "        type=\"text\" class=\"lvhs-input\" placeholder=\"Поиск...\" autocapitalize=\"false\" spellcheck=\"false\" autocomplete=\"off\"\n" +
     "        ng-model=\"filter.query\"\n" +
     "        ng-model-options=\"{updateOn: 'default blur', debounce: {'default': 500, 'blur': 0}}\"\n" +
     "        >\n" +
-    "    <i class=\"lvh-search-close\" ng-click=\"showSearch = false; filter.query = ''\">&times;</i>\n" +
+    "    <i class=\"lvh-search-close\" ng-click=\"search.show = false; filter.query = ''\">&times;</i>\n" +
     "</div>\n"
   );
 

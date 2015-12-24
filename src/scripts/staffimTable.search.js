@@ -12,7 +12,7 @@
             scope: {
                 columns: '=',
                 params: '=',
-                showSearch: '='
+                search: '='
             },
             link: function($scope, element) {
                 var lastQuery = '';
@@ -28,8 +28,8 @@
                     }
                 });
 
-                $scope.$watch('showSearch', function(showSearch) {
-                    if (showSearch) {
+                $scope.$watch('search.show', function(show) {
+                    if (show) {
                         $timeout(function() {
                             element.find('[data-field="input_search"]').focus();
                         });
