@@ -86,7 +86,7 @@
             ngTableEventsChannel.onAfterReloadData(function() {
                 vm.forms = _.reduce(ngTableParams.data, function(memo, item) {
                     if (!memo[item.id]) {
-                        var form = editForm.getFormInstance(vm, item);
+                        var form = editForm.getFormInstance(item);
                         form.setTableOptions();
 
                         memo[item.id] = form;
