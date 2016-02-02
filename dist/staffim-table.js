@@ -80,13 +80,15 @@
         service.getColumn = getColumn;
         service.init = init;
 
-        function init(vm, $scope, ngTableParams, editForm) {
+        function init(vm, $scope, ngTableParams, editForm, model) {
             vm.forms = {};
 
             ngTableEventsChannel.onAfterReloadData(function() {
                 vm.forms = _.reduce(ngTableParams.data, function(memo, item) {
                     if (!memo[item.id]) {
-                        var form = editForm.getFormInstance(item);
+                        var newModel = model.$build(item);
+                        newModel.$pk = item.id;
+                        var form = editForm.getFormInstance(newModel);
                         form.setTableOptions();
 
                         memo[item.id] = form;
