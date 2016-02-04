@@ -1,5 +1,5 @@
 <tr class="ng-table-sort-header">
-    <th colspan="{{$columns.length}}">
+    <th colspan="{{params.headerColspan ? params.headerColspan : $columns.length}}">
         <div class="lv-header-alt clearfix" ng-init="stSearch = {show: false};">
             <ng-include ng-if="params.headerTemplate" src="params.headerTemplate"></ng-include>
             <h2 class="lvh-label hidden-xs" ng-if="params.headerH2">{{params.headerH2}}</h2>
@@ -16,3 +16,4 @@
         </div>
     </th>
 </tr>
+<tr ng-if="params.headerAdditionalRowTemplate" ng-include="params.headerAdditionalRowTemplate"></tr>
