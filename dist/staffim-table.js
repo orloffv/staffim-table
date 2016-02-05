@@ -327,6 +327,13 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
   );
 
 
+  $templateCache.put('/staffim-table/headerFilter.html',
+    "<div class=\"row\">\n" +
+    "    <sf-table-header-filter params=\"params\" form-instance=\"vm.customFilterForm\"></sf-table-header-filter>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('/staffim-table/pagination.html',
     "<div class=\"lv-body ng-cloak ng-table-empty\" ng-if=\"params.total() === 0 && params.showEmpty !== false\">\n" +
     "    <div class=\"text-center text-uppercase p-25\">Ничего не найдено</div>\n" +
