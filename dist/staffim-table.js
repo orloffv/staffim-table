@@ -329,7 +329,7 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('/staffim-table/headerFilter.html',
     "<div class=\"row\">\n" +
-    "    <sf-table-header-filter params=\"params\" form-instance=\"vm.customFilterForm\"></sf-table-header-filter>\n" +
+    "    <sf-table-header-filter params=\"params\" form-instance=\"vm.customFilterForm\" mapper=\"vm.customFilterFormMapper\"></sf-table-header-filter>\n" +
     "</div>\n"
   );
 
