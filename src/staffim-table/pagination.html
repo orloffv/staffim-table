@@ -1,7 +1,7 @@
 <div class="lv-body ng-cloak ng-table-empty" ng-if="params.total() === 0 && params.showEmpty !== false">
     <div class="text-center text-uppercase p-25">Ничего не найдено</div>
 </div>
-<div class="ng-cloak ng-table-pager" ng-if="params.total() > params.count()">
+<div class="ng-cloak ng-table-pager" ng-if="params.total() > params.count() && params.showPagination">
     <ul ng-if="pages.length" class="pagination ng-table-pagination">
         <li ng-class="{'disabled': !page.active && !page.current, 'active': page.current}" ng-repeat="page in pages" ng-switch="page.type">
             <a ng-switch-when="prev" ng-click="params.page(page.number)" href="">&laquo;</a>
