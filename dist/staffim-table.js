@@ -318,12 +318,22 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
     "        </div>\n" +
     "    </th>\n" +
     "</tr>\n" +
-    "<tr ng-if=\"params.headerAdditionalRowTemplate\" ng-include=\"params.headerAdditionalRowTemplate\"></tr>\n"
+    "<tr ng-if=\"params.headerAdditionalRowTemplate\" ng-include=\"params.headerAdditionalRowTemplate\"></tr>\n" +
+    "<tr ng-if=\"params.headerColumnsTitle\" ng-include=\"'/staffim-table/headerColumnsTitle.html'\"></tr>\n"
   );
 
 
   $templateCache.put('/staffim-table/headerCheckbox.html',
     "<input type=\"checkbox\" ng-model=\"vm.selected.checked\"/>\n"
+  );
+
+
+  $templateCache.put('/staffim-table/headerColumnsTitle.html',
+    "<th ng-repeat=\"$column in $columns\" class=\"header\">\n" +
+    "    <div class=\"ng-table-header\">\n" +
+    "        <span ng-bind=\"$column.title(this)\"></span>\n" +
+    "    </div>\n" +
+    "</th>\n"
   );
 
 
