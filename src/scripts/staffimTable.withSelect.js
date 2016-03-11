@@ -12,6 +12,7 @@
             var stopWatchChecked, stopWatchItems;
             vm.selected = {
                 checked: false,
+                checkedItems: [],
                 items: {}
             };
 
@@ -39,9 +40,13 @@
                         unchecked = 0,
                         total = _.size(ngTableParams.data);
 
+                    vm.selected.checkedItems = [];
                     _.each(ngTableParams.data, function(item) {
                         checked   +=  (vm.selected.items[item.id]) || 0;
                         unchecked += (!vm.selected.items[item.id]) || 0;
+                        if (vm.selected.items[item.id]) {
+                            vm.selected.checkedItems.push(item.id);
+                        }
                     });
 
                     if ((unchecked === 0) || (checked === 0)) {
