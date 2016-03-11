@@ -302,7 +302,7 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
   $templateCache.put('/staffim-table/header.html',
     "<tr class=\"ng-table-sort-header\">\n" +
     "    <th colspan=\"{{params.headerColspan ? params.headerColspan : $columns.length}}\">\n" +
-    "        <div class=\"lv-header-alt clearfix\" ng-init=\"stSearch = {show: false};\">\n" +
+    "        <div class=\"lv-header-alt clearfix\" ng-init=\"stSearch = {show: false};\" ng-class=\"params.headerClassName\">\n" +
     "            <ng-include ng-if=\"params.headerTemplate\" src=\"params.headerTemplate\"></ng-include>\n" +
     "            <h2 class=\"lvh-label hidden-xs\" ng-if=\"params.headerH2\">{{params.headerH2}}</h2>\n" +
     "            <st-search ng-if=\"params.searchDisable !== true\" columns=\"$columns\" params=\"params\" search=\"stSearch\"></st-search>\n" +

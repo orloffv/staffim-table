@@ -1,6 +1,6 @@
 <tr class="ng-table-sort-header">
     <th colspan="{{params.headerColspan ? params.headerColspan : $columns.length}}">
-        <div class="lv-header-alt clearfix" ng-init="stSearch = {show: false};">
+        <div class="lv-header-alt clearfix" ng-init="stSearch = {show: false};" ng-class="params.headerClassName">
             <ng-include ng-if="params.headerTemplate" src="params.headerTemplate"></ng-include>
             <h2 class="lvh-label hidden-xs" ng-if="params.headerH2">{{params.headerH2}}</h2>
             <st-search ng-if="params.searchDisable !== true" columns="$columns" params="params" search="stSearch"></st-search>
