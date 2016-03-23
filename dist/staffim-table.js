@@ -6,8 +6,8 @@
     angular.module('staffimTable')
         .service('STWithSelect', STWithSelect);
 
-    STWithSelect.$inject = ['ngTableEventsChannel'];
-    function STWithSelect(ngTableEventsChannel) {
+    STWithSelect.$inject = [];
+    function STWithSelect() {
         var service = {};
         service.getColumn = getColumn;
         service.init = init;
@@ -16,10 +16,14 @@
             var stopWatchChecked, stopWatchItems;
             vm.selected = {
                 checked: false,
+                checkedItems: [],
                 items: {}
             };
 
-            ngTableEventsChannel.onAfterReloadData(function() {
+            ngTableParams.on('data_changed', onDataChanged);
+            onDataChanged();
+
+            function onDataChanged() {
                 if (_.isFunction(stopWatchChecked)) {
                     stopWatchChecked();
                 }
@@ -43,16 +47,20 @@
                         unchecked = 0,
                         total = _.size(ngTableParams.data);
 
+                    vm.selected.checkedItems = [];
                     _.each(ngTableParams.data, function(item) {
                         checked   +=  (vm.selected.items[item.id]) || 0;
                         unchecked += (!vm.selected.items[item.id]) || 0;
+                        if (vm.selected.items[item.id]) {
+                            vm.selected.checkedItems.push(item.id);
+                        }
                     });
 
                     if ((unchecked === 0) || (checked === 0)) {
                         vm.selected.checked = (checked === total && total > 0);
                     }
                 }, true);
-            }, $scope, ngTableParams);
+            }
         }
 
         function getColumn() {
@@ -74,8 +82,8 @@
     angular.module('staffimTable')
         .service('STWithActions', STWithActions);
 
-    STWithActions.$inject = ['ngTableEventsChannel'];
-    function STWithActions(ngTableEventsChannel) {
+    STWithActions.$inject = [];
+    function STWithActions() {
         var service = {};
         service.getColumn = getColumn;
         service.init = init;
@@ -83,7 +91,10 @@
         function init(vm, $scope, ngTableParams, editForm, model) {
             vm.forms = {};
 
-            ngTableEventsChannel.onAfterReloadData(function() {
+            ngTableParams.on('data_changed', onDataChanged);
+            onDataChanged();
+
+            function onDataChanged() {
                 vm.forms = _.reduce(ngTableParams.data, function(memo, item) {
                     if (!memo[item.id]) {
                         var newModel = model.$build(item);
@@ -96,8 +107,7 @@
 
                     return memo;
                 }, vm.forms);
-
-            }, $scope, ngTableParams);
+            }
         }
 
         function getColumn() {
@@ -263,6 +273,7 @@
 'use strict';
 (function() {
     angular.module('staffimTable')
+        .run(sTables)
         .run(ngTables);
 
     ngTables.$inject = ['ngTableDefaults'];
@@ -272,7 +283,423 @@
         ngTableDefaults.settings.paginationMaxBlocks = 10;
         ngTableDefaults.settings.paginationMinBlocks = 2;
     }
+
+    sTables.$inject = ['stDefaults'];
+    function sTables(stDefaults) {
+        stDefaults.params.count = 20;
+        stDefaults.settings.counts = [];
+        stDefaults.settings.paginationMaxBlocks = 10;
+        stDefaults.settings.paginationMinBlocks = 2;
+    }
 })();
+
+'use strict';
+(function() {
+    angular.module('staffimTable')
+        .value('stDefaults', {
+            params: {},
+            settings: {}
+        });
+}());
+
+'use strict';
+(function() {
+    angular.module('staffimTable')
+        .factory('STParams', STParams);
+
+    STParams.$inject = ['stDefaults', '$q', '$rootScope'];
+    function STParams(stDefaults, $q, $rootScope) {
+        var STParams = function(baseParameters, baseSettings) {
+            var that = this;
+            this.data = [];
+            this.id = _.uniqueId('STParams');
+            this.parameters = parameters;
+            this.settings = settings;
+            this.page = page;
+            this.total = total;
+            this.count = count;
+            this.filter = filter;
+            this.sorting = sorting;
+            this.orderBy = orderBy;
+            this.generatePagesArray = generatePagesArray;
+            this.reload = reload;
+            this.reloadPages = reloadPages;
+            this.setData = setData;
+            this.getData = getData;
+            this.getDataWrapper = getDataWrapper;
+            this.getSortFilterModel = getSortFilterModel;
+            this.formSortFilter = formSortFilter;
+            this.currentPages = [];
+            this.on = on;
+            this.emit = emit;
+
+            function getSortFilterModel() {
+                return {
+                    sort: this.sorting(),
+                    filter: this.filter()
+                };
+            }
+
+            function on(event, callback) {
+                var handler = $rootScope.$on(this.id + '-' + event, function(event, params) {
+                    callback(params);
+                });
+            }
+
+            function emit(event, params) {
+                $rootScope.$emit(this.id + '-' + event, params);
+            }
+
+            function parameters(newParameters, init) {
+                if (angular.isDefined(newParameters)) {
+                    _.each(newParameters, function(value, key) {
+                        params[key] = (_.isNumber(value) ? parseFloat(value) : value);
+                    });
+                    if (!init) {
+                        if (!_.has(newParameters, 'page')) {
+                            params.page = 1;
+                        }
+                        this.reload();
+                    }
+
+                    return this;
+                }
+
+                return params;
+            }
+
+            function orderBy() {
+                return convertSortToOrderBy(params.sorting);
+            }
+
+            function convertSortToOrderBy(sorting) {
+                return _.map(sorting, function(order, column) {
+                    return (order === 'asc' ? '+' : '-') + column;
+                });
+            }
+
+            function getData() {
+                return this.data;
+            }
+
+            function setData(data) {
+                this.data = data;
+                this.emit('data_changed');
+                this.reloadPages();
+
+                return this;
+            }
+
+            function settings(newSettings) {
+                if (angular.isDefined(newSettings)) {
+                    var originalDataset = settings.data;
+                    var newDataset = newSettings.dataset;
+
+                    if (newDataset && !_.isEqual(newDataset, originalDataset)) {
+                        this.setData(newDataset);
+                    }
+                    settings = angular.extend(settings, newSettings);
+                    delete settings.dataset;
+
+                    return this;
+                }
+
+                return settings;
+            }
+
+            function formSortFilter(form) {
+                if (angular.isDefined(form)) {
+                    form.updateFields(function(field) {
+                        if (!field.modelOptions) {
+                            field.modelOptions = {};
+                        }
+
+                        field.modelOptions.debounce = 500;
+                    });
+                    formSortFilter = form;
+                } else {
+                    return formSortFilter;
+                }
+            }
+
+            function page(page) {
+                return angular.isDefined(page) ?
+                    this.parameters({
+                        page: page
+                    }) :
+                    params.page;
+            }
+
+            function total(total) {
+                return angular.isDefined(total) ?
+                    this.settings({
+                        total: total
+                    }) :
+                    settings.total;
+            }
+
+            function count(count) {
+                return angular.isDefined(count) ?
+                    this.parameters({
+                        count: count,
+                        page: 1
+                    }) :
+                    params.count;
+            }
+
+            function filter(filter) {
+                return angular.isDefined(filter) && angular.isObject(filter) ?
+                    this.parameters({
+                        filter: filter,
+                        page: 1
+                    }) :
+                    params.filter;
+            }
+
+            function sorting(sorting) {
+                if (arguments.length === 2) {
+                    var sortArray = {};
+                    sortArray[sorting] = arguments[1];
+                    this.parameters({
+                        sorting: sortArray
+                    });
+
+                    return this;
+                }
+
+                return angular.isDefined(sorting) ?
+                    this.parameters({
+                        sorting: sorting
+                    }) :
+                    params.sorting;
+            }
+
+            function generatePagesArray(currentPage, totalItems, pageSize, maxBlocks) {
+                if (!arguments.length){
+                    currentPage = this.page();
+                    totalItems = this.total();
+                    pageSize = this.count();
+                }
+
+                var maxPage, maxPivotPages, minPage, numPages, pages;
+                maxBlocks = maxBlocks && maxBlocks < 6 ? 6 : maxBlocks;
+
+                pages = [];
+                numPages = Math.ceil(totalItems / pageSize);
+                if (numPages > 1) {
+                    pages.push({
+                        type: 'prev',
+                        number: Math.max(1, currentPage - 1),
+                        active: currentPage > 1
+                    });
+                    pages.push({
+                        type: 'first',
+                        number: 1,
+                        active: currentPage > 1,
+                        current: currentPage === 1
+                    });
+                    maxPivotPages = Math.round((settings.paginationMaxBlocks - settings.paginationMinBlocks) / 2);
+                    minPage = Math.max(2, currentPage - maxPivotPages);
+                    maxPage = Math.min(numPages - 1, currentPage + maxPivotPages * 2 - (currentPage - minPage));
+                    minPage = Math.max(2, minPage - (maxPivotPages * 2 - (maxPage - minPage)));
+                    var i = minPage;
+                    while (i <= maxPage) {
+                        if ((i === minPage && i !== 2) || (i === maxPage && i !== numPages - 1)) {
+                            pages.push({
+                                type: 'more',
+                                active: false
+                            });
+                        } else {
+                            pages.push({
+                                type: 'page',
+                                number: i,
+                                active: currentPage !== i,
+                                current: currentPage === i
+                            });
+                        }
+                        i++;
+                    }
+                    pages.push({
+                        type: 'last',
+                        number: numPages,
+                        active: currentPage !== numPages,
+                        current: currentPage === numPages
+                    });
+                    pages.push({
+                        type: 'next',
+                        number: Math.min(numPages, currentPage + 1),
+                        active: currentPage < numPages
+                    });
+                }
+
+                return pages;
+            }
+
+            function getDataWrapper() {
+                var $defer = $q.defer();
+                var pData = settings.getData.call(this, $defer, this);
+                if (!pData) {
+                    pData = $defer.promise;
+                }
+
+                return pData;
+            }
+
+            function reload() {
+                var that = this;
+
+                this.getDataWrapper()
+                    .then(function(data) {
+                        that.setData(data);
+
+                        return data;
+                    })
+                    .catch(function(reason){
+                        return $q.reject(reason);
+                    });
+            }
+
+            function reloadPages() {
+                var newPages = this.generatePagesArray();
+                if (!_.isEqual(this.currentPages, newPages)) {
+                    this.currentPages = newPages;
+                    this.emit('pages_changed', newPages);
+                }
+            }
+
+            var params = {
+                page: 1,
+                count: 10,
+                filter: {},
+                sorting: {}
+            };
+            angular.extend(params, stDefaults.params);
+
+            var settings = {
+                total: 0,
+                defaultSort: 'desc',
+                counts: [10, 25, 50, 100],
+                paginationMaxBlocks: 11,
+                paginationMinBlocks: 5
+            };
+
+            var formSortFilter;
+
+            this.settings(stDefaults.settings);
+            this.settings(baseSettings);
+            this.parameters(baseParameters, true);
+        };
+
+        return STParams;
+    }
+}());
+
+
+'use strict';
+(function() {
+    angular.module('staffimTable')
+        .directive('stPagination', stPagination);
+
+    function stPagination() {
+        return {
+            restrict: 'E',
+            templateUrl: '/staffim-table/pagination.html',
+            scope: {
+                params: '='
+            },
+            replace: true,
+            link: function($scope) {
+                $scope.pages = $scope.params.generatePagesArray();
+                $scope.params.on('pages_changed', function(pages) {
+                    if (!_.isEqual(pages, $scope.pages)) {
+                        $scope.pages = pages;
+                    }
+                });
+            }
+        };
+    }
+}());
+
+'use strict';
+(function() {
+    angular.module('staffimTable')
+        .directive('stSortFilter', stSortFilter);
+
+    function stSortFilter() {
+        return {
+            restrict: 'E',
+            templateUrl: '/staffim-table/sortFilter.html',
+            scope: {
+                params: '='
+            },
+            replace: true,
+            link: function($scope) {
+                $scope.form = $scope.params.formSortFilter();
+                $scope.options = $scope.form.getFormOptions();
+                $scope.model = $scope.form.getFormModel();
+                $scope.fields = $scope.form.getFields();
+
+                $scope.$watch('model.filter', function(data) {
+                    var filter = angular.copy($scope.params.filter());
+                    _.each(data, function(value, key) {
+                        if (!_.isNull(value) && !_.isUndefined(value)) {
+                            if (value !== filter[key]) {
+                                filter[key] = value;
+                            }
+                        } else {
+                            delete filter[key];
+                        }
+                    });
+
+                    if (!_.isEqual($scope.params.filter(), filter)) {
+                        $scope.params.filter(filter);
+                    }
+                }, true);
+
+                $scope.$watch('model.sort', function(data) {
+                    var sort = {};
+                    _.each(data, function(value, key) {
+                        var words = _.words(value, '|');
+                        if (_.size(words) === 2) {
+                            //if (!_.has(sort, words[0]) || words[1] === sort[words[0]]) {}
+                            sort[words[0]] = words[1];
+                        } else {
+                            sort[key] = value;
+                        }
+                    });
+
+                    if (!_.isEqual($scope.params.sorting(), sort)) {
+                        $scope.params.sorting(sort);
+                    }
+                }, true);
+            }
+        };
+    }
+}());
+
+'use strict';
+(function() {
+    angular.module('staffimTable')
+        .directive('stInlineEdit', stInlineEdit);
+
+    function stInlineEdit() {
+        return {
+            templateUrl: '/staffim-table/inlineEdit.html',
+            restrict: 'A',
+            scope: {
+                formInstance: '='
+            },
+            link: function($scope) {
+                $scope.$watch('formInstance', function() {
+                    $scope.options = $scope.formInstance.getFormOptions();
+                    $scope.model = $scope.formInstance.getFormModel();
+                    $scope.fields = $scope.formInstance.getFields();
+                    $scope.onSubmit = $scope.formInstance.onSubmit.bind($scope.formInstance);
+                });
+            }
+        };
+    }
+}());
 
 angular.module('staffimTable').run(['$templateCache', function($templateCache) {
   'use strict';
@@ -344,21 +771,44 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
   );
 
 
+  $templateCache.put('/staffim-table/inlineEdit.html',
+    "<formly-form model=\"model\" fields=\"fields\" options=\"formInstance.getFormOptions()\" form=\"formInstance.form\">\n" +
+    "</formly-form>\n" +
+    "<div class=\"block-absolute\">\n" +
+    "    <div class=\"lv-actions actions\" ng-if=\"!options.formState.edit\" ng-click=\"options.formState.edit = true\">\n" +
+    "        <a href=\"\">\n" +
+    "            <i class=\"zmdi zmdi-edit\"></i>\n" +
+    "        </a>\n" +
+    "    </div>\n" +
+    "    <div class=\"lv-actions actions\" ng-if=\"options.formState.edit\">\n" +
+    "        <button type=\"submit\" class=\"btn btn-success m-r-5 waves-effect\" ng-click=\"onSubmit()\">\n" +
+    "            <i class=\"zmdi zmdi-check\"></i>\n" +
+    "        </button>\n" +
+    "        <button type=\"button\" class=\"btn btn-default waves-effect\" ng-click=\"formInstance.resetModel(); options.formState.edit = false\">\n" +
+    "            <i class=\"zmdi zmdi-close\"></i>\n" +
+    "        </button>\n" +
+    "    </div>\n" +
+    "</div>\n"
+  );
+
+
   $templateCache.put('/staffim-table/pagination.html',
-    "<div class=\"lv-body ng-cloak ng-table-empty\" ng-if=\"params.total() === 0 && params.showEmpty !== false\">\n" +
-    "    <div class=\"text-center text-uppercase p-25\">Ничего не найдено</div>\n" +
-    "</div>\n" +
-    "<div class=\"ng-cloak ng-table-pager\" ng-if=\"params.total() > params.count() && params.showPagination !== false\">\n" +
-    "    <ul ng-if=\"pages.length\" class=\"pagination ng-table-pagination\">\n" +
-    "        <li ng-class=\"{'disabled': !page.active && !page.current, 'active': page.current}\" ng-repeat=\"page in pages\" ng-switch=\"page.type\">\n" +
-    "            <a ng-switch-when=\"prev\" ng-click=\"params.page(page.number)\" href=\"\">&laquo;</a>\n" +
-    "            <a ng-switch-when=\"first\" ng-click=\"params.page(page.number)\" href=\"\"><span ng-bind=\"page.number\"></span></a>\n" +
-    "            <a ng-switch-when=\"page\" ng-click=\"params.page(page.number)\" href=\"\"><span ng-bind=\"page.number\"></span></a>\n" +
-    "            <a ng-switch-when=\"more\" ng-click=\"params.page(page.number)\" href=\"\">&#8230;</a>\n" +
-    "            <a ng-switch-when=\"last\" ng-click=\"params.page(page.number)\" href=\"\"><span ng-bind=\"page.number\"></span></a>\n" +
-    "            <a ng-switch-when=\"next\" ng-click=\"params.page(page.number)\" href=\"\">&raquo;</a>\n" +
-    "        </li>\n" +
-    "    </ul>\n" +
+    "<div>\n" +
+    "    <div class=\"lv-body ng-cloak ng-table-empty\" ng-if=\"params.total() === 0 && params.showEmpty !== false\">\n" +
+    "        <div class=\"text-center text-uppercase p-25\">Ничего не найдено</div>\n" +
+    "    </div>\n" +
+    "    <div class=\"ng-cloak ng-table-pager\" ng-if=\"params.total() > params.count() && params.showPagination !== false\">\n" +
+    "        <ul ng-if=\"pages.length\" class=\"pagination ng-table-pagination\">\n" +
+    "            <li ng-class=\"{'disabled': !page.active && !page.current, 'active': page.current}\" ng-repeat=\"page in pages\" ng-switch=\"page.type\">\n" +
+    "                <a ng-switch-when=\"prev\" ng-click=\"params.page(page.number)\" href=\"\">&laquo;</a>\n" +
+    "                <a ng-switch-when=\"first\" ng-click=\"params.page(page.number)\" href=\"\"><span ng-bind=\"page.number\"></span></a>\n" +
+    "                <a ng-switch-when=\"page\" ng-click=\"params.page(page.number)\" href=\"\"><span ng-bind=\"page.number\"></span></a>\n" +
+    "                <a ng-switch-when=\"more\" ng-click=\"params.page(page.number)\" href=\"\">&#8230;</a>\n" +
+    "                <a ng-switch-when=\"last\" ng-click=\"params.page(page.number)\" href=\"\"><span ng-bind=\"page.number\"></span></a>\n" +
+    "                <a ng-switch-when=\"next\" ng-click=\"params.page(page.number)\" href=\"\">&raquo;</a>\n" +
+    "            </li>\n" +
+    "        </ul>\n" +
+    "    </div>\n" +
     "</div>\n"
   );
 
@@ -392,6 +842,15 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
     "        </li>\n" +
     "    </ul>\n" +
     "</li>\n"
+  );
+
+
+  $templateCache.put('/staffim-table/sortFilter.html',
+    "<div class=\"row\">\n" +
+    "    <div class=\"table-header-filter\">\n" +
+    "        <formly-form model=\"model\" fields=\"fields\" options=\"form.getFormOptions()\" form=\"form.form\"></formly-form>\n" +
+    "    </div>\n" +
+    "</div>\n"
   );
 
 }]);

@@ -2,8 +2,8 @@
     angular.module('staffimTable')
         .service('STWithActions', STWithActions);
 
-    STWithActions.$inject = ['ngTableEventsChannel'];
-    function STWithActions(ngTableEventsChannel) {
+    STWithActions.$inject = [];
+    function STWithActions() {
         var service = {};
         service.getColumn = getColumn;
         service.init = init;
@@ -11,7 +11,10 @@
         function init(vm, $scope, ngTableParams, editForm, model) {
             vm.forms = {};
 
-            ngTableEventsChannel.onAfterReloadData(function() {
+            ngTableParams.on('data_changed', onDataChanged);
+            onDataChanged();
+
+            function onDataChanged() {
                 vm.forms = _.reduce(ngTableParams.data, function(memo, item) {
                     if (!memo[item.id]) {
                         var newModel = model.$build(item);
@@ -24,8 +27,7 @@
 
                     return memo;
                 }, vm.forms);
-
-            }, $scope, ngTableParams);
+            }
         }
 
         function getColumn() {

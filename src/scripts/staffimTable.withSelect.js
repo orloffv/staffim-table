@@ -2,8 +2,8 @@
     angular.module('staffimTable')
         .service('STWithSelect', STWithSelect);
 
-    STWithSelect.$inject = ['ngTableEventsChannel'];
-    function STWithSelect(ngTableEventsChannel) {
+    STWithSelect.$inject = [];
+    function STWithSelect() {
         var service = {};
         service.getColumn = getColumn;
         service.init = init;
@@ -12,10 +12,14 @@
             var stopWatchChecked, stopWatchItems;
             vm.selected = {
                 checked: false,
+                checkedItems: [],
                 items: {}
             };
 
-            ngTableEventsChannel.onAfterReloadData(function() {
+            ngTableParams.on('data_changed', onDataChanged);
+            onDataChanged();
+
+            function onDataChanged() {
                 if (_.isFunction(stopWatchChecked)) {
                     stopWatchChecked();
                 }
@@ -39,16 +43,20 @@
                         unchecked = 0,
                         total = _.size(ngTableParams.data);
 
+                    vm.selected.checkedItems = [];
                     _.each(ngTableParams.data, function(item) {
                         checked   +=  (vm.selected.items[item.id]) || 0;
                         unchecked += (!vm.selected.items[item.id]) || 0;
+                        if (vm.selected.items[item.id]) {
+                            vm.selected.checkedItems.push(item.id);
+                        }
                     });
 
                     if ((unchecked === 0) || (checked === 0)) {
                         vm.selected.checked = (checked === total && total > 0);
                     }
                 }, true);
-            }, $scope, ngTableParams);
+            }
         }
 
         function getColumn() {
