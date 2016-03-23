@@ -2,8 +2,8 @@
     angular.module('staffimTable')
         .service('STWithSelect', STWithSelect);
 
-    STWithSelect.$inject = ['ngTableEventsChannel'];
-    function STWithSelect(ngTableEventsChannel) {
+    STWithSelect.$inject = [];
+    function STWithSelect() {
         var service = {};
         service.getColumn = getColumn;
         service.init = init;
@@ -16,7 +16,10 @@
                 items: {}
             };
 
-            ngTableEventsChannel.onAfterReloadData(function() {
+            ngTableParams.on('data_changed', onDataChanged);
+            onDataChanged();
+
+            function onDataChanged() {
                 if (_.isFunction(stopWatchChecked)) {
                     stopWatchChecked();
                 }
@@ -53,7 +56,7 @@
                         vm.selected.checked = (checked === total && total > 0);
                     }
                 }, true);
-            }, $scope, ngTableParams);
+            }
         }
 
         function getColumn() {
