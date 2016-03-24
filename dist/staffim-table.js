@@ -358,10 +358,15 @@
 
             function parameters(newParameters, init) {
                 if (angular.isDefined(newParameters)) {
+                    var changed = false;
                     _.each(newParameters, function(value, key) {
-                        params[key] = (_.isNumber(value) ? parseFloat(value) : value);
+                        var newValue = (_.isNumber(value) ? parseFloat(value) : value);
+                        if (!_.isEqual(params[key], newValue)) {
+                            params[key] = newValue;
+                            changed = true;
+                        }
                     });
-                    if (!init) {
+                    if (!init && changed) {
                         if (!_.has(newParameters, 'page')) {
                             params.page = 1;
                         }
