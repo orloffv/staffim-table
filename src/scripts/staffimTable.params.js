@@ -30,8 +30,14 @@
             this.emit = emit;
 
             function getSortFilterModel() {
+                var sorting = this.sorting();
+
+                if (_.size(sorting) === 1) {
+                    sorting = {once: _.first(_.keys(sorting)) + '|' + _.first(_.values(sorting))};
+                }
+
                 return {
-                    sort: this.sorting(),
+                    sort: sorting,
                     filter: this.filter()
                 };
             }
