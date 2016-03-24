@@ -25,6 +25,7 @@
             this.getDataWrapper = getDataWrapper;
             this.getSortFilterModel = getSortFilterModel;
             this.formSortFilter = formSortFilter;
+            this.filterFormatter = filterFormatter;
             this.currentPages = [];
             this.on = on;
             this.emit = emit;
@@ -54,15 +55,23 @@
 
             function parameters(newParameters, init) {
                 if (angular.isDefined(newParameters)) {
-                    var changed = false;
+                    var filterFormattedData = settings.filterFormatter(angular.copy(this.filter()));
+                    var filterChanged = false;
+                    var otherChanged = false;
                     _.each(newParameters, function(value, key) {
                         var newValue = (_.isNumber(value) ? parseFloat(value) : value);
                         if (!_.isEqual(params[key], newValue)) {
                             params[key] = newValue;
-                            changed = true;
+                            if (key === 'filter') {
+                                filterChanged = true;
+                            } else {
+                                otherChanged = true;
+                            }
                         }
                     });
-                    if (!init && changed) {
+                    var formattedDataChanged = filterChanged && !_.isEqual(filterFormattedData, settings.filterFormatter(angular.copy(this.filter())));
+
+                    if (!init && (formattedDataChanged || otherChanged)) {
                         if (!_.has(newParameters, 'page')) {
                             params.page = 1;
                         }
@@ -161,6 +170,10 @@
                         page: 1
                     }) :
                     params.filter;
+            }
+
+            function filterFormatter() {
+                return settings.filterFormatter(angular.copy(this.filter()));
             }
 
             function sorting(sorting) {
@@ -287,7 +300,10 @@
                 defaultSort: 'desc',
                 counts: [10, 25, 50, 100],
                 paginationMaxBlocks: 11,
-                paginationMinBlocks: 5
+                paginationMinBlocks: 5,
+                filterFormatter: function(data) {
+                    return data;
+                }
             };
 
             var formSortFilter;
