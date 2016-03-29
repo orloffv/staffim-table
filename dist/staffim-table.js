@@ -333,6 +333,14 @@
             this.currentPages = [];
             this.on = on;
             this.emit = emit;
+            this.destroy = destroy;
+
+            function destroy() {
+                delete this.data;
+                if (formSortFilterInstance && formSortFilterInstance.destroy) {
+                    formSortFilterInstance.destroy();
+                }
+            }
 
             function getSortFilterModel() {
                 var sorting = this.sorting();
@@ -436,9 +444,9 @@
 
                         field.modelOptions.debounce = 500;
                     });
-                    formSortFilter = form;
+                    formSortFilterInstance = form;
                 } else {
-                    return formSortFilter;
+                    return formSortFilterInstance;
                 }
             }
 
@@ -610,7 +618,7 @@
                 }
             };
 
-            var formSortFilter;
+            var formSortFilterInstance;
 
             this.settings(stDefaults.settings);
             this.settings(baseSettings);
