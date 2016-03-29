@@ -30,12 +30,17 @@
             this.on = on;
             this.emit = emit;
             this.destroy = destroy;
+            this.destroyHandlers = [];
 
             function destroy() {
                 delete this.data;
                 if (formSortFilterInstance && formSortFilterInstance.destroy) {
                     formSortFilterInstance.destroy();
                 }
+
+                _.each(this.destroyHandlers, function(handler) {
+                    handler();
+                });
             }
 
             function getSortFilterModel() {
@@ -55,6 +60,8 @@
                 var handler = $rootScope.$on(this.id + '-' + event, function(event, params) {
                     callback(params);
                 });
+
+                this.destroyHandlers.push(handler);
             }
 
             function emit(event, params) {
