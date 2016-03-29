@@ -17,7 +17,7 @@
                 $scope.model = $scope.form.getFormModel();
                 $scope.fields = $scope.form.getFields();
 
-                $scope.$watch('model.filter', function(data) {
+                $scope.$watchCollection('model.filter', function(data) {
                     var filter = angular.copy($scope.params.filter());
                     _.each(data, function(value, key) {
                         if (!_.isNull(value) && !_.isUndefined(value)) {
@@ -32,9 +32,9 @@
                     if (!_.isEqual($scope.params.filter(), filter)) {
                         $scope.params.filter(filter);
                     }
-                }, true);
+                });
 
-                $scope.$watch('model.sort', function(data) {
+                $scope.$watchCollection('model.sort', function(data) {
                     var sort = {};
                     _.each(data, function(value, key) {
                         var words = _.words(value, '|');
@@ -49,7 +49,7 @@
                     if (!_.isEqual($scope.params.sorting(), sort)) {
                         $scope.params.sorting(sort);
                     }
-                }, true);
+                });
             }
         };
     }
