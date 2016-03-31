@@ -147,6 +147,7 @@
 
                         field.modelOptions.debounce = 500;
                     });
+                    form.setSimpleOptions();
                     formSortFilterInstance = form;
                 } else {
                     return formSortFilterInstance;
