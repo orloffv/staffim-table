@@ -221,6 +221,9 @@
                 maxBlocks = maxBlocks && maxBlocks < 6 ? 6 : maxBlocks;
 
                 pages = [];
+                if (pageSize === 0) {
+                    return pages;
+                }
                 numPages = Math.ceil(totalItems / pageSize);
                 if (numPages > 1) {
                     pages.push({

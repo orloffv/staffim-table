@@ -525,6 +525,9 @@
                 maxBlocks = maxBlocks && maxBlocks < 6 ? 6 : maxBlocks;
 
                 pages = [];
+                if (pageSize === 0) {
+                    return pages;
+                }
                 numPages = Math.ceil(totalItems / pageSize);
                 if (numPages > 1) {
                     pages.push({
@@ -840,8 +843,8 @@ angular.module('staffimTable').run(['$templateCache', function($templateCache) {
     "    <div class=\"lv-body ng-cloak ng-table-empty\" ng-if=\"params.total() === 0 && params.showEmpty !== false\">\n" +
     "        <div class=\"text-center text-uppercase p-25\">Ничего не найдено</div>\n" +
     "    </div>\n" +
-    "    <div class=\"ng-cloak ng-table-pager\" ng-if=\"params.total() > params.count() && params.showPagination !== false\">\n" +
-    "        <ul ng-if=\"pages.length\" class=\"pagination ng-table-pagination\">\n" +
+    "    <div class=\"ng-cloak ng-table-pager\" ng-if=\"params.total() > params.count() && params.showPagination !== false && pages.length\">\n" +
+    "        <ul class=\"pagination ng-table-pagination\">\n" +
     "            <li ng-class=\"{'disabled': !page.active && !page.current, 'active': page.current}\" ng-repeat=\"page in pages\" ng-switch=\"page.type\">\n" +
     "                <a ng-switch-when=\"prev\" ng-click=\"params.page(page.number)\" href=\"\">&laquo;</a>\n" +
     "                <a ng-switch-when=\"first\" ng-click=\"params.page(page.number)\" href=\"\"><span ng-bind=\"page.number\"></span></a>\n" +
