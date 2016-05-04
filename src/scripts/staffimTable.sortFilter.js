@@ -20,7 +20,7 @@
                 $scope.$watchCollection('model.filter', function(data) {
                     var filter = angular.copy($scope.params.filter());
                     _.each(data, function(value, key) {
-                        if (!_.isNull(value) && !_.isUndefined(value)) {
+                        if (!_.isUndefined(value)) {
                             if (value !== filter[key]) {
                                 filter[key] = value;
                             }
