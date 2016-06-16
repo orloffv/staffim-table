@@ -8,14 +8,14 @@
         service.getColumn = getColumn;
         service.init = init;
 
-        function init(vm, $scope, ngTableParams, editForm, model) {
+        function init(vm, $scope, stTableParams, editForm, model) {
             vm.forms = {};
 
-            ngTableParams.on('data_changed', onDataChanged);
+            stTableParams.on('data_changed', onDataChanged);
             onDataChanged();
 
             function onDataChanged() {
-                vm.forms = _.reduce(ngTableParams.data, function(memo, item) {
+                vm.forms = _.reduce(stTableParams.data, function(memo, item) {
                     if (!memo[item.id]) {
                         var newModel = model.$build(item);
                         newModel.$pk = item.id;

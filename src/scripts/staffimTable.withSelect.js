@@ -8,7 +8,7 @@
         service.getColumn = getColumn;
         service.init = init;
 
-        function init(vm, $scope, ngTableParams) {
+        function init(vm, $scope, stTableParams) {
             var stopWatchChecked, stopWatchItems;
             vm.selected = {
                 checked: false,
@@ -16,7 +16,7 @@
                 items: {}
             };
 
-            ngTableParams.on('data_changed', onDataChanged);
+            stTableParams.on('data_changed', onDataChanged);
             onDataChanged();
 
             function onDataChanged() {
@@ -26,7 +26,7 @@
                 stopWatchChecked = $scope.$watch(function() {
                     return vm.selected.checked;
                 }, function(value) {
-                    vm.selected.items = _.reduce(ngTableParams.data, function(memo, item) {
+                    vm.selected.items = _.reduce(stTableParams.data, function(memo, item) {
                         memo[item.id] = value;
 
                         return memo;
@@ -41,10 +41,10 @@
                 }, function() {
                     var checked = 0,
                         unchecked = 0,
-                        total = _.size(ngTableParams.data);
+                        total = _.size(stTableParams.data);
 
                     vm.selected.checkedItems = [];
-                    _.each(ngTableParams.data, function(item) {
+                    _.each(stTableParams.data, function(item) {
                         checked   +=  (vm.selected.items[item.id]) || 0;
                         unchecked += (!vm.selected.items[item.id]) || 0;
                         if (vm.selected.items[item.id]) {

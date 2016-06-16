@@ -1,3 +1,3 @@
 (function(){
-    angular.module('staffimTable', ['ngTable']);
+    angular.module('staffimTable', []);
 })();

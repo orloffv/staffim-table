@@ -1,5 +1,5 @@
 (function(){
-    angular.module('staffimTable', ['ngTable']);
+    angular.module('staffimTable', []);
 })();
 
 (function(){
@@ -12,7 +12,7 @@
         service.getColumn = getColumn;
         service.init = init;
 
-        function init(vm, $scope, ngTableParams) {
+        function init(vm, $scope, stTableParams) {
             var stopWatchChecked, stopWatchItems;
             vm.selected = {
                 checked: false,
@@ -20,7 +20,7 @@
                 items: {}
             };
 
-            ngTableParams.on('data_changed', onDataChanged);
+            stTableParams.on('data_changed', onDataChanged);
             onDataChanged();
 
             function onDataChanged() {
@@ -30,7 +30,7 @@
                 stopWatchChecked = $scope.$watch(function() {
                     return vm.selected.checked;
                 }, function(value) {
-                    vm.selected.items = _.reduce(ngTableParams.data, function(memo, item) {
+                    vm.selected.items = _.reduce(stTableParams.data, function(memo, item) {
                         memo[item.id] = value;
 
                         return memo;
@@ -45,10 +45,10 @@
                 }, function() {
                     var checked = 0,
                         unchecked = 0,
-                        total = _.size(ngTableParams.data);
+                        total = _.size(stTableParams.data);
 
                     vm.selected.checkedItems = [];
-                    _.each(ngTableParams.data, function(item) {
+                    _.each(stTableParams.data, function(item) {
                         checked   +=  (vm.selected.items[item.id]) || 0;
                         unchecked += (!vm.selected.items[item.id]) || 0;
                         if (vm.selected.items[item.id]) {
@@ -88,14 +88,14 @@
         service.getColumn = getColumn;
         service.init = init;
 
-        function init(vm, $scope, ngTableParams, editForm, model) {
+        function init(vm, $scope, stTableParams, editForm, model) {
             vm.forms = {};
 
-            ngTableParams.on('data_changed', onDataChanged);
+            stTableParams.on('data_changed', onDataChanged);
             onDataChanged();
 
             function onDataChanged() {
-                vm.forms = _.reduce(ngTableParams.data, function(memo, item) {
+                vm.forms = _.reduce(stTableParams.data, function(memo, item) {
                     if (!memo[item.id]) {
                         var newModel = model.$build(item);
                         newModel.$pk = item.id;
@@ -273,16 +273,7 @@
 'use strict';
 (function() {
     angular.module('staffimTable')
-        .run(sTables)
-        .run(ngTables);
-
-    ngTables.$inject = ['ngTableDefaults'];
-    function ngTables(ngTableDefaults) {
-        ngTableDefaults.params.count = 20;
-        ngTableDefaults.settings.counts = [];
-        ngTableDefaults.settings.paginationMaxBlocks = 10;
-        ngTableDefaults.settings.paginationMinBlocks = 2;
-    }
+        .run(sTables);
 
     sTables.$inject = ['stDefaults'];
     function sTables(stDefaults) {
