@@ -298,8 +298,8 @@
     angular.module('staffimTable')
         .factory('STParams', STParams);
 
-    STParams.$inject = ['stDefaults', '$q', '$rootScope'];
-    function STParams(stDefaults, $q, $rootScope) {
+    STParams.$inject = ['stDefaults', '$q', '$rootScope', '$injector'];
+    function STParams(stDefaults, $q, $rootScope, $injector) {
         var STParams = function(baseParameters, baseSettings) {
             var that = this;
             this.data = [];
@@ -435,6 +435,14 @@
 
             function formSortFilter(form) {
                 if (angular.isDefined(form)) {
+                    var SFService = $injector.get('SFService');
+                    if (!(form instanceof SFService)) {
+                        var fields = form;
+                        form = new SFService();
+                        form
+                            .setOriginalModel(this.getSortFilterModel())
+                            .setFields(fields);
+                    }
                     form.updateFields(function(field) {
                         if (!field.modelOptions) {
                             field.modelOptions = {};
