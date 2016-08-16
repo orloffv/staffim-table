@@ -26,11 +26,13 @@
                 stopWatchChecked = $scope.$watch(function() {
                     return vm.selected.checked;
                 }, function(value) {
-                    vm.selected.items = _.reduce(stTableParams.data, function(memo, item) {
-                        memo[item.id] = value;
+                    if (!_.isNull(value)) {
+                        vm.selected.items = _.reduce(stTableParams.data, function(memo, item) {
+                            memo[item.id] = value;
 
-                        return memo;
-                    }, {});
+                            return memo;
+                        }, {});
+                    }
                 });
 
                 if (_.isFunction(stopWatchItems)) {
@@ -54,6 +56,8 @@
 
                     if ((unchecked === 0) || (checked === 0)) {
                         vm.selected.checked = (checked === total && total > 0);
+                    } else {
+                        vm.selected.checked = null;
                     }
                 }, true);
             }
